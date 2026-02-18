@@ -4,23 +4,18 @@ import { getFirestore } from 'firebase/firestore';
 
 // ============================================================
 // FIREBASE CONFIGURATION
-// Replace these values with your own Firebase project config.
-//
-// To set up:
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project (or use an existing one)
-// 3. Add a web app (click the </> icon)
-// 4. Copy your config values below
-// 5. Enable Firestore Database (in test mode to start)
-// 6. Enable Storage (in test mode to start)
+// These are client-side Firebase keys — they are designed to be
+// public. Security is enforced by Firestore & Storage rules,
+// not by hiding these values. This is standard Firebase practice.
+// See: https://firebase.google.com/docs/projects/api-keys
 // ============================================================
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_SENDER_ID",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID"
+  apiKey: "AIzaSyALHpXJMzK6SXPPsC5F-BtRVSar5qgpLiY",
+  authDomain: "hlcca-photo-guide.firebaseapp.com",
+  projectId: "hlcca-photo-guide",
+  storageBucket: "hlcca-photo-guide.firebasestorage.app",
+  messagingSenderId: "394918238288",
+  appId: "1:394918238288:web:0b33bcd95d4a78a2b41955"
 };
 
 const app = initializeApp(firebaseConfig);
