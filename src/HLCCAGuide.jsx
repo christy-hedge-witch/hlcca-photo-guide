@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PhotoGallery from "./PhotoGallery";
+import { db } from "./firebase";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 
 const shapes = [
   {
@@ -203,7 +206,7 @@ const shapes = [
     description: "The modern reintroduction. Lead-free, dishwasher and microwave safe. Retains signature concentric rings with updated seasonal colors. Over 40 colors produced since 1986.",
     notes: "Retired colors (Juniper, Persimmon, Lilac) are increasingly collectible.",
     searchQuery: "Fiesta dinnerware contemporary Homer Laughlin modern colors collection",
-    imageUrl: "https://images.fiestafactorydirect.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/f/f/fff_coll_hero.jpg"
+    imageUrl: "/images/fiesta-contemporary-set.jpg"
   },
   {
     name: "Fiesta – Vintage",
@@ -215,7 +218,7 @@ const shapes = [
     description: "The original. Designed by Frederick Hurten Rhead with bold concentric rings and vibrant glazes. Original colors: red (radioactive!), cobalt, ivory, yellow, green, and later turquoise, rose, chartreuse, gray, dark green, medium green.",
     notes: "Original red contains uranium oxide. Dark green and medium green are the rarest vintage colors.",
     searchQuery: "vintage Fiesta Homer Laughlin original colors cobalt red yellow dinnerware",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Fiestaware_color_chart.jpg/800px-Fiestaware_color_chart.jpg"
+    imageUrl: "/images/fiesta-vintage-bowl.jpg"
   },
   {
     name: "Fiestaware 2000",
@@ -606,7 +609,7 @@ const collectibilityColor = {
 const eras = ["All", ...new Set(shapes.map(s => s.era))];
 const categories = ["All", ...new Set(shapes.map(s => s.category))];
 
-function ShapeCard({ shape, isSelected, onClick }) {
+function ShapeCard({ shape, isSelected, onClick, firebaseReady }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -780,6 +783,16 @@ function ShapeCard({ shape, isSelected, onClick }) {
           </a>
         )}
 
+        {isSelected && (
+          <div onClick={e => e.stopPropagation()}>
+            <PhotoGallery
+              shapeName={shape.name}
+              shapeColor={shape.color}
+              firebaseReady={firebaseReady}
+            />
+          </div>
+        )}
+
         <div style={{
           textAlign: "right",
           fontSize: "0.65rem",
@@ -799,6 +812,22 @@ export default function HLCCAGuide() {
   const [catFilter, setCatFilter] = useState("All");
   const [selected, setSelected] = useState(null);
   const [sortBy, setSortBy] = useState("year");
+  const [firebaseReady, setFirebaseReady] = useState(false);
+
+  // Check if Firebase is properly configured
+  useEffect(() => {
+    async function checkFirebase() {
+      try {
+        const q = query(collection(db, "photos"), limit(1));
+        await getDocs(q);
+        setFirebaseReady(true);
+      } catch (e) {
+        console.log("Firebase not configured yet:", e.message);
+        setFirebaseReady(false);
+      }
+    }
+    checkFirebase();
+  }, []);
 
   const filtered = shapes
     .filter(s => {
@@ -836,6 +865,17 @@ export default function HLCCAGuide() {
         <p style={{ margin: 0, color: "#b0956a", fontSize: "0.85rem", fontStyle: "italic" }}>
           All {shapes.length} shapes & lines on the HLCCA membership form · Click any card to expand
         </p>
+        <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: "4px",
+            fontSize: "0.7rem", color: firebaseReady ? "#6b8f71" : "#8a7050",
+            background: firebaseReady ? "#6b8f7120" : "#8a705020",
+            padding: "3px 10px", borderRadius: "12px"
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: firebaseReady ? "#6b8f71" : "#8a7050" }} />
+            {firebaseReady ? "Community photos active — expand a card to contribute!" : "Community photos offline"}
+          </span>
+        </div>
       </div>
 
       {/* Controls */}
@@ -887,6 +927,7 @@ export default function HLCCAGuide() {
             shape={shape}
             isSelected={selected?.name === shape.name}
             onClick={() => setSelected(selected?.name === shape.name ? null : shape)}
+            firebaseReady={firebaseReady}
           />
         ))}
       </div>
@@ -899,7 +940,13 @@ export default function HLCCAGuide() {
 
       {/* Footer */}
       <div style={{ textAlign: "center", padding: "1.5rem", color: "#8a7050", fontSize: "0.75rem", borderTop: "1px solid #d4c4a4", fontStyle: "italic" }}>
-        Sources: HLCCA.org · laurelhollowpark.net · Carnegie Public Library HLC Archive · Click any expanded card to search Etsy for that shape
+        Sources: HLCCA.org · laurelhollowpark.net · Carnegie Public Library HLC Archive
+        <br />
+        Community-powered photo sharing · Click any card to contribute your own photos
+        <br />
+        <span style={{ fontSize: "0.65rem" }}>
+          Wikimedia Commons images used under CC BY-SA 4.0 / CC BY 2.0
+        </span>
       </div>
     </div>
   );
